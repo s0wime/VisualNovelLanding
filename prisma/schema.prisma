@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Visitor {
+  id String @db.Uuid @id
+  email String? @unique
+  firstSeenAt DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+  sessions Session[]
+  events Event[]
+  quizAttempts QuizAttempt[]
+}
+
+model Session {
+  id Int @id @default(autoincrement())
+  visitor Visitor @relation(fields: [visitorId], references: [id])
+  visitorId String @db.Uuid
+  sessionStart DateTime @default(now())
+  sessionEnd DateTime?
+  duration Int?
+  lastActivityAt DateTime @default(now())
+  ipAddress String?
+  uaDevice String?
+  uaOs String?
+  uaBrowser String?
+  referrer String?
+  scrollDepthPercentage Int?
+  events Event[]
+  quizAttempts QuizAttempt[]
+}
+
+model Event {
+  id Int @id @default(autoincrement())
+  session Session @relation(fields: [sessionId], references: [id])
+  sessionId Int
+  visitor Visitor @relation(fields: [visitorId], references: [id])
+  visitorId String @db.Uuid
+  eventType EventType
+  timestamp DateTime
+}
+
+model Question {
+  id Int @id @default(autoincrement())
+  text String
+  answers Answer[]
+  quizResponses QuizResponse[]
+}
+
+model Answer {
+  id Int @id @default(autoincrement())
+  question Question @relation(fields: [questionId], references: [id])
+  questionId Int
+  text String
+  quizResponses QuizResponse[]
+}
+
+model QuizAttempt {
+  id Int @id @default(autoincrement())
+  session Session @relation(fields: [sessionId], references: [id])
+  sessionId Int
+  visitor Visitor @relation(fields: [visitorId], references: [id])
+  visitorId String @db.Uuid
+  startedAt DateTime @default(now())
+  completedAt DateTime?
+  isCompleted Boolean @default(false)
+  quizResponses QuizResponse[]
+}
+
+model QuizResponse {
+  id Int @id @default(autoincrement())
+  quizAttempt QuizAttempt @relation(fields: [quizAttemptId], references: [id])
+  quizAttemptId Int
+  question Question @relation(fields: [questionId], references: [id])
+  questionId Int
+  answer Answer @relation(fields: [answerId], references: [id])
+  answerId Int
+  answeredAt DateTime @default(now())
+}
+
+enum EventType {
+  CLICK_HERO_CTA
+  CLICK_POST_QUIZ_CTA
+  QUIZ_STARTED
+  CLICK_WILLING_TO_PAY_BUTTON
+  EMAIL_FORM_SUBMITTED
+  CLICK_FAQ_ITEM
+}
