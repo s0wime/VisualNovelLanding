@@ -6,6 +6,16 @@ const PORT = 3000;
 
 const app = express();
 
+app.use((err, req, res, next) => {
+  console.log(err.message);
+
+  if (err.name === "NotFoundError") {
+    return res.status(404).json({ error: "Not found." });
+  }
+
+  return res.status(500).json({ error: "Internal server error." });
+});
+
 app.use("/api/sessions", sessionsRouter);
 
 app.get("/api", (req, res) => {
