@@ -2,7 +2,7 @@ import VisitorsService from "../services/visitorsService.js";
 
 class VisitorsController {
   static async addVisitor(req, res, next) {
-    const { visitorId } = req.query;
+    const { visitorId } = req.body;
 
     if (!visitorId) {
       return res.status(400).json({ error: "Bad request." });
