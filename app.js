@@ -1,26 +1,31 @@
 import express from "express";
 import sessionsRouter from "./routes/sessionsRouter.js";
+import visitorsRouter from "./routes/visitortsRouter.js";
 import useragent from "useragent";
+import dotenv from "dotenv";
 
 const PORT = 3000;
 
 const app = express();
 
+dotenv.config();
+
 app.use((err, req, res, next) => {
   console.log(err.message);
 
   if (err.name === "NotFoundError") {
-    return res.status(404).json({ error: "Not found." });
+    return res.status(404).send(err.message);
   }
 
   if (err.name === "BadRequestError") {
-    return res.status(400).json({ error: "Bad request." });
+    return res.status(400).json({ error: err.message });
   }
 
   return res.status(500).json({ error: "Internal server error." });
 });
 
 app.use("/api/sessions", sessionsRouter);
+app.use("/api/visitors", visitorsRouter);
 
 app.get("/api", (req, res) => {
   const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;

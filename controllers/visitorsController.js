@@ -1,20 +1,18 @@
 import VisitorsService from "../services/visitorsService.js";
 
 class VisitorsController {
-  static async addVisitor(req, res) {
-    const visitorId = req.params.visitorId;
+  static async addVisitor(req, res, next) {
+    const { visitorId } = req.query;
 
     if (!visitorId) {
       return res.status(400).json({ error: "Bad request." });
     }
 
-    const parsedVisitorId = Number(visitorId);
-
-    if (isNaN(parsedVisitorId)) {
-      return res.status(400).json({ error: "Bad request." });
+    try {
+      await VisitorsService.addVisitor(visitorId);
+    } catch (e) {
+      next(e);
     }
-
-    VisitorsService.addVisitor(visitorId);
 
     return res.status(201).json({ message: "Visitor was created." });
   }

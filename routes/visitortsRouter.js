@@ -1,8 +1,8 @@
 import { Router } from "express";
-import SessionsController from "../controllers/sessionsController";
+import VisitorsController from "../controllers/visitorsController.js";
 
 const router = new Router();
 
-router.post("/:visitorId", SessionsController.addVisitor);
+router.post("/", VisitorsController.addVisitor);
 
 export default router;
