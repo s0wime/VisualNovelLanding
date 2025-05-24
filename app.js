@@ -13,6 +13,10 @@ app.use((err, req, res, next) => {
     return res.status(404).json({ error: "Not found." });
   }
 
+  if (err.name === "BadRequestError") {
+    return res.status(400).json({ error: "Bad request." });
+  }
+
   return res.status(500).json({ error: "Internal server error." });
 });
 
