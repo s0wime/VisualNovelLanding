@@ -16,6 +16,45 @@ class SessionsService {
 
     await SessionsRepository.createSessionRecord(params);
   }
+
+  static async recordSessionActivity(
+    visitorId,
+    ipAddress,
+    agent,
+    referrer,
+    scrollDepthPercentage
+  ) {
+    const session = await this.getActiveSession(visitorId);
+
+    if (!session) {
+      this.initSession(visitorId, ipAddress, agent, referrer);
+      return;
+    }
+
+    console.log(session);
+
+    const params = {
+      sessionId: session.id,
+      lastActivityAt: new Date().toISOString(),
+    };
+
+    if (scrollDepthPercentage) {
+      params.scrollDepthPercentage =
+        scrollDepthPercentage > session.scrollDepthPercentage
+          ? scrollDepthPercentage
+          : session.scrollDepthPercentage;
+    } else {
+      params.scrollDepthPercentage = session.scrollDepthPercentage;
+    }
+
+    await SessionsRepository.updateSessionRecord(params);
+  }
+
+  static async getActiveSession(visitorId) {
+    const session = await SessionsRepository.readActiveSessionRecord(visitorId);
+
+    return session;
+  }
 }
 
 export default SessionsService;

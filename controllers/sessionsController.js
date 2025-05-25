@@ -2,7 +2,7 @@ import SessionsService from "../services/sessionsService.js";
 import useragent from "useragent";
 
 class SessionsController {
-  static async initSession(req, res, next) {
+  static async handleSessionActivity(req, res, next) {
     const body = req.body;
 
     if (!body.visitorId) {
@@ -15,16 +15,23 @@ class SessionsController {
     const uaString = req.headers["user-agent"];
     const agent = useragent.parse(uaString);
     const referrer = req.get("Referrer") || req.get("Referer");
+    const scrollDepthPercentage = body?.scrollDepthPercentage ?? 0;
 
     try {
-      await SessionsService.initSession(visitorId, ipAddress, agent, referrer);
+      await SessionsService.recordSessionActivity(
+        visitorId,
+        ipAddress,
+        agent,
+        referrer,
+        scrollDepthPercentage
+      );
     } catch (e) {
       next(e);
     }
 
     return res
       .status(201)
-      .json({ message: "Session was successfully initialized." });
+      .json({ message: "Session activity has been updated." });
   }
 }
 
