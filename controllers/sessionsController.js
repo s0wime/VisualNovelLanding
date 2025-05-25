@@ -1,5 +1,6 @@
 import SessionsService from "../services/sessionsService.js";
 import useragent from "useragent";
+import VisitorsService from "../services/visitorsService.js";
 
 class SessionsController {
   static async handleSessionActivity(req, res, next) {
@@ -10,6 +11,16 @@ class SessionsController {
     }
 
     const visitorId = body.visitorId;
+
+    try {
+      const visitor = await VisitorsService.getVisitor(visitorId);
+      if (!visitor) {
+        await VisitorsService.addVisitor(visitorId);
+      }
+    } catch (e) {
+      return next(e);
+    }
+
     const ipAddress =
       req.headers["x-forwarded-for"] || req.socket.remoteAddress;
     const uaString = req.headers["user-agent"];

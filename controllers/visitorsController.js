@@ -11,7 +11,7 @@ class VisitorsController {
     try {
       await VisitorsService.addVisitor(visitorId);
     } catch (e) {
-      next(e);
+      return next(e);
     }
 
     return res.status(201).json({ message: "Visitor was created." });

@@ -8,6 +8,23 @@ class VisitorsRepository {
       },
     });
   }
+
+  static async readVisitorRecord(visitorId) {
+    return await prisma.visitor.findFirst({
+      where: {
+        id: visitorId,
+      },
+    });
+  }
+
+  static async updateVisitorRecord(visitorId, params) {
+    await prisma.visitor.update({
+      where: {
+        id: visitorId,
+      },
+      data: params,
+    });
+  }
 }
 
 export default VisitorsRepository;

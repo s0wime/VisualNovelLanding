@@ -1,6 +1,7 @@
 import SessionsRepository from "../repositories/sessionsRepository.js";
 import NotFoundError from "../errors/NotFoundError.js";
 import useragent from "useragent";
+import VisitorsService from "./visitorsService.js";
 
 class SessionsService {
   static async initSession(visitorId, ipAddress, agent, referrer) {
@@ -32,11 +33,13 @@ class SessionsService {
       return;
     }
 
-    console.log(session);
+    const lastActivityAt = new Date().toISOString();
 
     const params = {
-      lastActivityAt: new Date().toISOString(),
+      lastActivityAt: lastActivityAt,
     };
+
+    await VisitorsService.updateVisitorLastSeen(visitorId, lastActivityAt);
 
     if (scrollDepthPercentage) {
       params.scrollDepthPercentage =
