@@ -79,6 +79,13 @@ class SessionsService {
   static async getActiveSession(visitorId) {
     return await SessionsRepository.readActiveSessionRecord(visitorId);
   }
+
+  static async updateSessionLastActivity(sessionId, lastActivityAt) {
+    const params = {
+      lastActivityAt: lastActivityAt,
+    };
+    return await SessionsRepository.updateSessionRecord(sessionId, params);
+  }
 }
 
 export default SessionsService;

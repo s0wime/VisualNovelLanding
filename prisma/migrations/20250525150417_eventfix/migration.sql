@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Event" ALTER COLUMN "timestamp" SET DEFAULT CURRENT_TIMESTAMP;
