@@ -1,7 +1,6 @@
 import express from "express";
 import sessionsRouter from "./routes/sessionsRouter.js";
 import visitorsRouter from "./routes/visitortsRouter.js";
-import useragent from "useragent";
 import dotenv from "dotenv";
 
 const PORT = 3000;
@@ -28,21 +27,6 @@ app.use((err, req, res, next) => {
 
 app.use("/api/sessions", sessionsRouter);
 app.use("/api/visitors", visitorsRouter);
-
-app.get("/api", (req, res) => {
-  const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-  const uaString = req.headers["user-agent"];
-  const agent = useragent.parse(uaString);
-
-  res.send(
-    JSON.stringify({
-      ip: ip,
-      device: agent.device.toString(),
-      os: agent.os.toString(),
-      browser: agent.toAgent(),
-    })
-  );
-});
 
 app.listen(PORT, () => {
   console.log(`App is running on http://localhost:${PORT}`);
