@@ -13,15 +13,12 @@ class SessionsRepository {
     });
   }
 
-  static async updateSessionRecord(params) {
+  static async updateSessionRecord(sessionId, params) {
     await prisma.session.update({
       where: {
-        id: params.sessionId,
+        id: sessionId,
       },
-      data: {
-        lastActivityAt: params.lastActivityAt,
-        scrollDepthPercentage: params.scrollDepthPercentage,
-      },
+      data: params,
     });
   }
 }

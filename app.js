@@ -11,11 +11,14 @@ dotenv.config();
 
 app.use(express.json());
 
+app.use("/api/sessions", sessionsRouter);
+app.use("/api/visitors", visitorsRouter);
+
 app.use((err, req, res, next) => {
-  console.log(err.message);
+  console.log("111111111111111111");
 
   if (err.name === "NotFoundError") {
-    return res.status(404).send(err.message);
+    return res.status(404).json({ error: err.message });
   }
 
   if (err.name === "BadRequestError") {
@@ -24,9 +27,6 @@ app.use((err, req, res, next) => {
 
   return res.status(500).json({ error: "Internal server error." });
 });
-
-app.use("/api/sessions", sessionsRouter);
-app.use("/api/visitors", visitorsRouter);
 
 app.listen(PORT, () => {
   console.log(`App is running on http://localhost:${PORT}`);

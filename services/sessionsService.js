@@ -1,4 +1,5 @@
 import SessionsRepository from "../repositories/sessionsRepository.js";
+import NotFoundError from "../errors/NotFoundError.js";
 import useragent from "useragent";
 
 class SessionsService {
@@ -34,7 +35,6 @@ class SessionsService {
     console.log(session);
 
     const params = {
-      sessionId: session.id,
       lastActivityAt: new Date().toISOString(),
     };
 
@@ -47,13 +47,34 @@ class SessionsService {
       params.scrollDepthPercentage = session.scrollDepthPercentage;
     }
 
-    await SessionsRepository.updateSessionRecord(params);
+    await SessionsRepository.updateSessionRecord(session.id, params);
+  }
+
+  static async endSession(visitorId) {
+    const session = await this.getActiveSession(visitorId);
+
+    if (!session) {
+      throw new NotFoundError("There is no opened sessions.");
+    }
+
+    const sessionEnd = new Date().toISOString();
+    const duration =
+      Math.abs(
+        new Date(session.sessionStart).getTime() -
+          new Date(sessionEnd).getTime()
+      ) / 1000;
+
+    const params = {
+      sessionEnd: sessionEnd,
+      duration: duration,
+      lastActivityAt: sessionEnd,
+    };
+
+    return await SessionsRepository.updateSessionRecord(session.id, params);
   }
 
   static async getActiveSession(visitorId) {
-    const session = await SessionsRepository.readActiveSessionRecord(visitorId);
-
-    return session;
+    return await SessionsRepository.readActiveSessionRecord(visitorId);
   }
 }
 

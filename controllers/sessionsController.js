@@ -26,12 +26,30 @@ class SessionsController {
         scrollDepthPercentage
       );
     } catch (e) {
-      next(e);
+      return next(e);
     }
 
     return res
       .status(201)
       .json({ message: "Session activity has been updated." });
+  }
+
+  static async handleSessionEnding(req, res, next) {
+    const body = req.body;
+
+    if (!body.visitorId) {
+      return res.status(400).json({ error: "Bad request." });
+    }
+
+    const visitorId = body.visitorId;
+
+    try {
+      await SessionsService.endSession(visitorId);
+    } catch (e) {
+      return next(e);
+    }
+
+    return res.status(201).json({ message: "Session has been closed." });
   }
 }
 
