@@ -2,13 +2,11 @@ import EventsService from "../services/eventsService.js";
 
 class EventsController {
   static async handleEvent(req, res, next) {
-    const body = req.body;
+    const { visitorId, eventType } = req.body;
 
-    if (!body.visitorId || !body.eventType) {
+    if (!visitorId || !eventType) {
       return res.status(400).json({ error: "Bad request." });
     }
-
-    const { visitorId, eventType } = body;
 
     try {
       await EventsService.handleEvent(visitorId, eventType);

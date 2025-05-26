@@ -4,13 +4,11 @@ import VisitorsService from "../services/visitorsService.js";
 
 class SessionsController {
   static async handleSessionActivity(req, res, next) {
-    const body = req.body;
+    const { visitorId } = req.body;
 
-    if (!body.visitorId) {
+    if (!visitorId) {
       return res.status(400).json({ error: "Bad request." });
     }
-
-    const visitorId = body.visitorId;
 
     try {
       const visitor = await VisitorsService.getVisitor(visitorId);
