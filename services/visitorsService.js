@@ -1,4 +1,5 @@
 import VisitorsRepository from "../repositories/visitorsRepository.js";
+import EventsService from "./eventsService.js";
 
 class VisitorsService {
   static async addVisitor(visitorId) {
@@ -19,7 +20,9 @@ class VisitorsService {
   }
 
   static async addVisitorEmail(visitorId, email) {
-    return await VisitorsRepository.addVisitorEmail(visitorId, email);
+    await VisitorsRepository.addVisitorEmail(visitorId, email);
+
+    return await EventsService.handleEvent(visitorId, "EMAIL_FORM_SUBMITTED");
   }
 }
 

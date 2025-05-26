@@ -1,8 +1,6 @@
 import QuizzesService from "../services/quizzesService.js";
 
 class QuizzesController {
-  static async handleQuiz(req, res, next) {}
-
   static async answerQuiz(req, res, next) {
     const { visitorId, answerObject } = req.body;
 

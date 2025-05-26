@@ -73,6 +73,8 @@ class SessionsService {
       lastActivityAt: sessionEnd,
     };
 
+    await VisitorsService.updateVisitorLastSeen(visitorId, sessionEnd);
+
     return await SessionsRepository.updateSessionRecord(session.id, params);
   }
 

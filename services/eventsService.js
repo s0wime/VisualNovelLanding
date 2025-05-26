@@ -23,8 +23,10 @@ class EventsService {
     };
 
     await EventsRepository.createEventRecord(params);
-    await SessionsService.updateSessionLastActivity(session.id, eventTime);
-    await VisitorsService.updateVisitorLastSeen(visitor.id, eventTime);
+    await Promise.all([
+      SessionsService.updateSessionLastActivity(session.id, eventTime),
+      VisitorsService.updateVisitorLastSeen(visitor.id, eventTime),
+    ]);
   }
 }
 

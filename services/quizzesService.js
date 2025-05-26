@@ -2,6 +2,7 @@ import NotFoundError from "../errors/NotFoundError.js";
 import QuizzesRepository from "../repositories/quizzesRepository.js";
 import SessionsService from "./sessionsService.js";
 import QuizHandlingError from "../errors/QuizHandlingError.js";
+import EventsService from "./eventsService.js";
 
 class QuizzesService {
   static async startQuiz(visitorId) {
@@ -18,6 +19,8 @@ class QuizzesService {
     }
 
     await QuizzesRepository.createQuizAttemptRecord(visitorId, session.id);
+
+    await EventsService.handleEvent(visitorId, "QUIZ_STARTED");
 
     const questionObject = await QuizzesRepository.getQuestionObjectByOrder(0);
 
@@ -103,6 +106,7 @@ class QuizzesService {
         duration: duration,
       };
       await QuizzesRepository.updateQuizAttemptRecord(quizAttempt.id, params);
+      await EventsService.handleEvent(quizAttempt.visitorId);
       return {
         quizEnded: true,
         message: "You have successfully completed the quiz.",
