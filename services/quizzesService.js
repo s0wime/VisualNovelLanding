@@ -88,7 +88,7 @@ class QuizzesService {
       ) / 1000;
 
     await QuizzesRepository.updateQuizAttemptRecord(quizAttempt.id, {
-      quizDuration,
+      duration: quizDuration,
     });
 
     await Promise.all([
@@ -127,7 +127,7 @@ class QuizzesService {
         duration: duration,
       };
       await QuizzesRepository.updateQuizAttemptRecord(quizAttempt.id, params);
-      await EventsService.handleEvent(quizAttempt.visitorId);
+      await EventsService.handleEvent(quizAttempt.visitorId, "QUIZ_ENDED");
       return {
         quizEnded: true,
         message: "You have successfully completed the quiz.",
