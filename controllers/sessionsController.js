@@ -4,7 +4,7 @@ import VisitorsService from "../services/visitorsService.js";
 
 class SessionsController {
   static async handleSessionActivity(req, res, next) {
-    const { visitorId } = req.body;
+    const { visitorId, scrollDepthPercentage } = req.body;
 
     if (!visitorId) {
       return res.status(400).json({ error: "Bad request." });
@@ -24,7 +24,7 @@ class SessionsController {
     const uaString = req.headers["user-agent"];
     const agent = useragent.parse(uaString);
     const referrer = req.get("Referrer") || req.get("Referer");
-    const scrollDepthPercentage = body?.scrollDepthPercentage ?? 0;
+    const scrollDepthPercentageParsed = scrollDepthPercentage ?? 0;
 
     try {
       await SessionsService.recordSessionActivity(
@@ -32,7 +32,7 @@ class SessionsController {
         ipAddress,
         agent,
         referrer,
-        scrollDepthPercentage
+        scrollDepthPercentageParsed
       );
     } catch (e) {
       return next(e);

@@ -31,9 +31,15 @@ class QuizzesRepository {
         order: questionOrder,
       },
     });
+
     if (!question) {
       return undefined;
     }
+
+    const totalQuestionsCount = await prisma.question.count();
+
+    question.isLast = totalQuestionsCount === question.order + 1;
+
     const answers = await prisma.answer.findMany({
       where: {
         questionId: question.id,

@@ -46,10 +46,6 @@ class QuizzesService {
       quizAttempt.id
     );
 
-    if (!lastQuizResponse) {
-      throw new QuizHandlingError("There is no quiz responses.");
-    }
-
     const answeredQuestionObject =
       await QuizzesRepository.getQuestionObjectById(answerObject.questionId);
 
@@ -57,7 +53,10 @@ class QuizzesService {
       throw new NotFoundError("There is no such question.");
     }
 
-    if (answeredQuestionObject.order <= lastQuizResponse.question.order) {
+    if (
+      lastQuizResponse &&
+      answeredQuestionObject.order <= lastQuizResponse.question.order
+    ) {
       throw new QuizHandlingError(
         "You already have answered to this question."
       );
