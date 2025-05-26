@@ -62,6 +62,12 @@ class QuizzesRepository {
       console.log(e);
     }
   }
+
+  static async createQuizResponseRecord(params) {
+    return await prisma.quizResponse.create({
+      data: params,
+    });
+  }
 }
 
 export default QuizzesRepository;

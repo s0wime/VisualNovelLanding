@@ -28,6 +28,31 @@ class QuizzesService {
     return questionObject;
   }
 
+  static async answerQuiz(visitorId, answerObject) {
+    const session = await SessionsService.getActiveSession(visitorId);
+    if (!session) {
+      throw new Error("There is no active session in visitor!");
+    }
+
+    const quizAttempt = await QuizzesRepository.getQuizAttemptRecord(
+      session.id
+    );
+
+    if (!quizAttempt) {
+      throw new QuizHandlingError("There is no active quiz!");
+    }
+
+    const params = {
+      quizAttemptId: quizAttempt.id,
+      questionId: answerObject.questionId,
+      answerId: answerObject.answerId,
+    };
+
+    await QuizzesRepository.createQuizResponseRecord(params);
+
+    return await this.continueQuiz(quizAttempt.id);
+  }
+
   static async continueQuiz(quizAttemptId) {
     const lastQuizResponse = await QuizzesRepository.getLastQuizResponse(
       quizAttemptId
