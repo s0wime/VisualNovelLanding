@@ -63,6 +63,17 @@ class QuizzesRepository {
     }
   }
 
+  static async getQuestionObjectById(questionId) {
+    return await prisma.question.findFirst({
+      where: {
+        id: questionId,
+      },
+      include: {
+        answers: true,
+      },
+    });
+  }
+
   static async createQuizResponseRecord(params) {
     return await prisma.quizResponse.create({
       data: params,

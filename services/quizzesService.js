@@ -42,6 +42,35 @@ class QuizzesService {
       throw new QuizHandlingError("There is no active quiz!");
     }
 
+    const lastQuizResponse = await QuizzesRepository.getLastQuizResponse(
+      quizAttempt.id
+    );
+
+    if (!lastQuizResponse) {
+      throw new QuizHandlingError("There is no quiz responses.");
+    }
+
+    const answeredQuestionObject =
+      await QuizzesRepository.getQuestionObjectById(answerObject.questionId);
+
+    if (!answeredQuestionObject) {
+      throw new NotFoundError("There is no such question.");
+    }
+
+    if (answeredQuestionObject.order <= lastQuizResponse.question.order) {
+      throw new QuizHandlingError(
+        "You already have answered to this question."
+      );
+    }
+
+    if (
+      !answeredQuestionObject.answers.some(
+        (answer) => answer.id === answerObject.answerId
+      )
+    ) {
+      throw new QuizHandlingError("There is no such answer for this question.");
+    }
+
     const params = {
       quizAttemptId: quizAttempt.id,
       questionId: answerObject.questionId,
