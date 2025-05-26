@@ -2,7 +2,7 @@ import prisma from "../prisma.js";
 
 class VisitorsRepository {
   static async initVisitorRecord(visitorId) {
-    await prisma.visitor.create({
+    return await prisma.visitor.create({
       data: {
         id: visitorId,
       },
@@ -18,11 +18,20 @@ class VisitorsRepository {
   }
 
   static async updateVisitorRecord(visitorId, params) {
-    await prisma.visitor.update({
+    return await prisma.visitor.update({
       where: {
         id: visitorId,
       },
       data: params,
+    });
+  }
+
+  static async addVisitorEmail(visitorId, email) {
+    return await prisma.visitor.update({
+      where: {
+        id: visitorId,
+      },
+      data: { email },
     });
   }
 }

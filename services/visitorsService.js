@@ -17,6 +17,10 @@ class VisitorsService {
 
     return await VisitorsRepository.updateVisitorRecord(visitorId, params);
   }
+
+  static async addVisitorEmail(visitorId, email) {
+    return await VisitorsRepository.addVisitorEmail(visitorId, email);
+  }
 }
 
 export default VisitorsService;
