@@ -79,6 +79,15 @@ class QuizzesRepository {
       data: params,
     });
   }
+
+  static async updateQuizAttemptRecord(quizAttemptId, params) {
+    return await prisma.quizAttempt.update({
+      where: {
+        id: quizAttemptId,
+      },
+      data: params,
+    });
+  }
 }
 
 export default QuizzesRepository;

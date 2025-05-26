@@ -14,7 +14,7 @@ class QuizzesService {
       session.id
     );
     if (quizAttempt) {
-      return await this.continueQuiz(quizAttempt.id);
+      return await this.continueQuiz(quizAttempt);
     }
 
     await QuizzesRepository.createQuizAttemptRecord(visitorId, session.id);
@@ -79,12 +79,12 @@ class QuizzesService {
 
     await QuizzesRepository.createQuizResponseRecord(params);
 
-    return await this.continueQuiz(quizAttempt.id);
+    return await this.continueQuiz(quizAttempt);
   }
 
-  static async continueQuiz(quizAttemptId) {
+  static async continueQuiz(quizAttempt) {
     const lastQuizResponse = await QuizzesRepository.getLastQuizResponse(
-      quizAttemptId
+      quizAttempt.id
     );
 
     const nextQuestionObject = await QuizzesRepository.getQuestionObjectByOrder(
@@ -92,6 +92,18 @@ class QuizzesService {
     );
 
     if (!nextQuestionObject) {
+      const completedAt = new Date().toISOString();
+      const duration =
+        Math.abs(
+          new Date(completedAt).getTime() -
+            new Date(quizAttempt.startedAt).getTime()
+        ) / 1000;
+      const params = {
+        completedAt: completedAt,
+        isCompleted: true,
+        duration: duration,
+      };
+      await QuizzesRepository.updateQuizAttemptRecord(quizAttempt.id, params);
       return {
         quizEnded: true,
         message: "You have successfully completed the quiz.",
