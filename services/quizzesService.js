@@ -3,6 +3,7 @@ import QuizzesRepository from "../repositories/quizzesRepository.js";
 import SessionsService from "./sessionsService.js";
 import QuizHandlingError from "../errors/QuizHandlingError.js";
 import EventsService from "./eventsService.js";
+import VisitorsService from "./visitorsService.js";
 
 class QuizzesService {
   static async startQuiz(visitorId) {
@@ -80,6 +81,26 @@ class QuizzesService {
     };
 
     await QuizzesRepository.createQuizResponseRecord(params);
+
+    const quizDuration =
+      Math.abs(
+        new Date(quizAttempt.startedAt).getTime() - new Date().getTime()
+      ) / 1000;
+
+    await QuizzesRepository.updateQuizAttemptRecord(quizAttempt.id, {
+      quizDuration,
+    });
+
+    await Promise.all([
+      VisitorsService.updateVisitorLastSeen(
+        visitorId,
+        new Date().toISOString()
+      ),
+      SessionsService.updateSessionLastActivity(
+        session.id,
+        new Date().toISOString()
+      ),
+    ]);
 
     return await this.continueQuiz(quizAttempt);
   }
