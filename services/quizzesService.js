@@ -57,13 +57,17 @@ class QuizzesService {
       throw new NotFoundError("There is no such question.");
     }
 
-    if (
-      lastQuizResponse &&
-      answeredQuestionObject.order <= lastQuizResponse.question.order
-    ) {
-      throw new QuizHandlingError(
-        "You already have answered to this question."
-      );
+    if (lastQuizResponse) {
+      if (answeredQuestionObject.order <= lastQuizResponse.question.order) {
+        throw new QuizHandlingError(
+          "You already have answered to this question."
+        );
+      } else if (
+        answeredQuestionObject.order >
+        lastQuizResponse.question.order + 1
+      ) {
+        throw new QuizHandlingError("You can't skip questions.");
+      }
     }
 
     if (
