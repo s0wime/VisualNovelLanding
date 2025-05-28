@@ -4,6 +4,7 @@ import visitorsRouter from "./routes/visitortsRouter.js";
 import eventsRouter from "./routes/eventsRouter.js";
 import quizzesRouter from "./routes/quizzesRouter.js";
 import dotenv from "dotenv";
+import cors from "cors";
 
 const PORT = 3000;
 
@@ -12,6 +13,15 @@ const app = express();
 dotenv.config();
 
 app.use(express.json());
+
+app.use(
+  cors({
+    origin: "*",
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+  })
+);
 
 app.use("/api/sessions", sessionsRouter);
 app.use("/api/visitors", visitorsRouter);
