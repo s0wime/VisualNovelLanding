@@ -114,6 +114,10 @@ class QuizzesService {
       quizAttempt.id
     );
 
+    if (!lastQuizResponse) {
+      return await QuizzesRepository.getQuestionObjectByOrder(0);
+    }
+
     const nextQuestionObject = await QuizzesRepository.getQuestionObjectByOrder(
       lastQuizResponse.question.order + 1
     );
