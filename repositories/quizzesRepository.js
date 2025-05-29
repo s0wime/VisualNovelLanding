@@ -25,20 +25,23 @@ class QuizzesRepository {
     });
   }
 
-  static async getQuestionObjectByOrder(questionOrder) {
+  static async getQuestionObjectByOrderAndGenre(questionOrder, genre) {
     const question = await prisma.question.findFirst({
       where: {
-        order: questionOrder,
+        AND: [
+          {
+            order: questionOrder,
+          },
+          {
+            genre: genre,
+          },
+        ],
       },
     });
 
     if (!question) {
       return undefined;
     }
-
-    const totalQuestionsCount = await prisma.question.count();
-
-    question.isLast = totalQuestionsCount === question.order + 1;
 
     const answers = await prisma.answer.findMany({
       where: {

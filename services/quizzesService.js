@@ -4,6 +4,9 @@ import SessionsService from "./sessionsService.js";
 import QuizHandlingError from "../errors/QuizHandlingError.js";
 import EventsService from "./eventsService.js";
 import VisitorsService from "./visitorsService.js";
+import BadRequestError from "../errors/BadRequestError.js";
+import SessionsRepository from "../repositories/sessionsRepository.js";
+import { GenreType } from "../generated/prisma/index.js";
 
 class QuizzesService {
   static async startQuiz(visitorId) {
@@ -23,13 +26,12 @@ class QuizzesService {
 
     await EventsService.handleEvent(visitorId, "QUIZ_STARTED");
 
-    const questionObject = await QuizzesRepository.getQuestionObjectByOrder(0);
-
-    if (!questionObject) {
-      throw new QuizHandlingError("Couldn't handle the quiz.");
-    }
-
-    return questionObject;
+    return {
+      question: {
+        aboutAge: true,
+        text: "What is your age?",
+      },
+    };
   }
 
   static async answerQuiz(visitorId, answerObject) {
@@ -44,6 +46,52 @@ class QuizzesService {
 
     if (!quizAttempt) {
       throw new QuizHandlingError("There is no active quiz!");
+    }
+
+    const quizDuration =
+      Math.abs(
+        new Date(quizAttempt.startedAt).getTime() - new Date().getTime()
+      ) / 1000;
+
+    await QuizzesRepository.updateQuizAttemptRecord(quizAttempt.id, {
+      duration: quizDuration,
+    });
+
+    await Promise.all([
+      VisitorsService.updateVisitorLastSeen(
+        visitorId,
+        new Date().toISOString()
+      ),
+      SessionsService.updateSessionLastActivity(
+        session.id,
+        new Date().toISOString()
+      ),
+    ]);
+
+    if (answerObject.aboutAge) {
+      if (answerObject.age < 1 || answerObject.age > 100) {
+        throw new BadRequestError("Bad request!");
+      }
+
+      await SessionsRepository.updateSessionRecord(session.id, {
+        age: answerObject.age,
+      });
+    } else if (answerObject.aboutGender) {
+      if (!["Male", "Female", "Other"].includes(answerObject.gender)) {
+        throw new BadRequestError("Bad request!");
+      }
+
+      await SessionsRepository.updateSessionRecord(session.id, {
+        gender: answerObject.gender,
+      });
+    } else if (answerObject.aboutQuizGenre) {
+      if (!Object.values(GenreType).includes(answerObject.quizGenre)) {
+        throw new BadRequestError("Bad request!");
+      }
+
+      await QuizzesRepository.updateQuizAttemptRecord(quizAttempt.id, {
+        quizType: answerObject.quizGenre,
+      });
     }
 
     const lastQuizResponse = await QuizzesRepository.getLastQuizResponse(
@@ -86,41 +134,57 @@ class QuizzesService {
 
     await QuizzesRepository.createQuizResponseRecord(params);
 
-    const quizDuration =
-      Math.abs(
-        new Date(quizAttempt.startedAt).getTime() - new Date().getTime()
-      ) / 1000;
-
-    await QuizzesRepository.updateQuizAttemptRecord(quizAttempt.id, {
-      duration: quizDuration,
-    });
-
-    await Promise.all([
-      VisitorsService.updateVisitorLastSeen(
-        visitorId,
-        new Date().toISOString()
-      ),
-      SessionsService.updateSessionLastActivity(
-        session.id,
-        new Date().toISOString()
-      ),
-    ]);
-
     return await this.continueQuiz(quizAttempt);
   }
 
   static async continueQuiz(quizAttempt) {
+    const session = await SessionsService.getActiveSession(visitorId);
+    if (!session) {
+      throw new Error("There is no active session in visitor!");
+    }
+
+    if (!session.age) {
+      const questionObject = {
+        question: {
+          aboutAge: true,
+          text: "What is your age?",
+        },
+      };
+      return questionObject;
+    } else if (!session.gender) {
+      const questionObject = {
+        question: {
+          aboutGender: true,
+          text: "What is your gender?",
+        },
+      };
+      return questionObject;
+    } else if (!quizAttempt.quizType) {
+      const questionObject = {
+        question: {
+          aboutQuizGenre: true,
+          text: "Choose genre",
+        },
+      };
+      return questionObject;
+    }
+
     const lastQuizResponse = await QuizzesRepository.getLastQuizResponse(
       quizAttempt.id
     );
 
     if (!lastQuizResponse) {
-      return await QuizzesRepository.getQuestionObjectByOrder(0);
+      return await QuizzesRepository.getQuestionObjectByOrderAndGenre(
+        0,
+        quizAttempt.quizType
+      );
     }
 
-    const nextQuestionObject = await QuizzesRepository.getQuestionObjectByOrder(
-      lastQuizResponse.question.order + 1
-    );
+    const nextQuestionObject =
+      await QuizzesRepository.getQuestionObjectByOrderAndGenre(
+        lastQuizResponse.question.order + 1,
+        quizAttempt.quizType
+      );
 
     if (!nextQuestionObject) {
       const completedAt = new Date().toISOString();
