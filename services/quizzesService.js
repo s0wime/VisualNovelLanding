@@ -92,53 +92,57 @@ class QuizzesService {
       await QuizzesRepository.updateQuizAttemptRecord(quizAttempt.id, {
         quizType: answerObject.quizGenre,
       });
-    }
+    } else {
+      const lastQuizResponse = await QuizzesRepository.getLastQuizResponse(
+        quizAttempt.id
+      );
 
-    const lastQuizResponse = await QuizzesRepository.getLastQuizResponse(
-      quizAttempt.id
-    );
+      const answeredQuestionObject =
+        await QuizzesRepository.getQuestionObjectById(answerObject.questionId);
 
-    const answeredQuestionObject =
-      await QuizzesRepository.getQuestionObjectById(answerObject.questionId);
-
-    if (!answeredQuestionObject) {
-      throw new NotFoundError("There is no such question.");
-    }
-
-    if (lastQuizResponse) {
-      if (answeredQuestionObject.order <= lastQuizResponse.question.order) {
-        throw new QuizHandlingError(
-          "You already have answered to this question."
-        );
-      } else if (
-        answeredQuestionObject.order >
-        lastQuizResponse.question.order + 1
-      ) {
-        throw new QuizHandlingError("You can't skip questions.");
+      if (!answeredQuestionObject) {
+        throw new NotFoundError("There is no such question.");
       }
+
+      if (lastQuizResponse) {
+        if (answeredQuestionObject.order <= lastQuizResponse.question.order) {
+          throw new QuizHandlingError(
+            "You already have answered to this question."
+          );
+        } else if (
+          answeredQuestionObject.order >
+          lastQuizResponse.question.order + 1
+        ) {
+          throw new QuizHandlingError("You can't skip questions.");
+        }
+      }
+
+      if (
+        !answeredQuestionObject.answers.some(
+          (answer) => answer.id === answerObject.answerId
+        )
+      ) {
+        throw new QuizHandlingError(
+          "There is no such answer for this question."
+        );
+      }
+
+      const params = {
+        quizAttemptId: quizAttempt.id,
+        questionId: answerObject.questionId,
+        answerId: answerObject.answerId,
+      };
+
+      await QuizzesRepository.createQuizResponseRecord(params);
     }
-
-    if (
-      !answeredQuestionObject.answers.some(
-        (answer) => answer.id === answerObject.answerId
-      )
-    ) {
-      throw new QuizHandlingError("There is no such answer for this question.");
-    }
-
-    const params = {
-      quizAttemptId: quizAttempt.id,
-      questionId: answerObject.questionId,
-      answerId: answerObject.answerId,
-    };
-
-    await QuizzesRepository.createQuizResponseRecord(params);
 
     return await this.continueQuiz(quizAttempt);
   }
 
   static async continueQuiz(quizAttempt) {
-    const session = await SessionsService.getActiveSession(visitorId);
+    const session = await SessionsService.getActiveSession(
+      quizAttempt.visitorId
+    );
     if (!session) {
       throw new Error("There is no active session in visitor!");
     }
