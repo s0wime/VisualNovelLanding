@@ -10,7 +10,6 @@ datasource db {
 
 model Visitor {
   id String @db.Uuid @id
-  email String? @unique
   firstSeenAt DateTime @default(now())
   lastSeenAt DateTime @default(now())
   sessions Session[]
@@ -31,7 +30,8 @@ model Session {
   uaOs String?
   uaBrowser String?
   referrer String?
-  scrollDepthPercentage Int @default(0)
+  age Int?
+  gender String?
   events Event[]
   quizAttempts QuizAttempt[]
 }
@@ -48,8 +48,9 @@ model Event {
 
 model Question {
   id Int @id @default(autoincrement())
+  genre GenreType
   text String
-  order Int @unique
+  order Int
   answers Answer[]
   quizResponses QuizResponse[]
 }
@@ -58,6 +59,7 @@ model Answer {
   id Int @id @default(autoincrement())
   question Question @relation(fields: [questionId], references: [id])
   questionId Int
+  option String
   text String
   quizResponses QuizResponse[]
 }
@@ -71,6 +73,7 @@ model QuizAttempt {
   startedAt DateTime @default(now())
   completedAt DateTime?
   duration Int?
+  quizType GenreType?
   isCompleted Boolean @default(false)
   quizResponses QuizResponse[]
 }
@@ -86,12 +89,22 @@ model QuizResponse {
   answeredAt DateTime @default(now())
 }
 
+model Story {
+  id Int @id @default(autoincrement())
+  option String
+  text String
+  genre GenreType
+}
+
+enum GenreType {
+  ROMANCE
+  SCI_FI
+  HORROR
+}
+
 enum EventType {
-  CLICK_HERO_CTA
-  CLICK_POST_QUIZ_CTA
-  CLICK_WILLING_TO_PAY_BUTTON
-  CLICK_FAQ_ITEM
+  CLICK_TRY_FREE
+  CLICK_TRY_PAID
   QUIZ_STARTED
   QUIZ_ENDED
-  EMAIL_FORM_SUBMITTED
 }
