@@ -92,6 +92,7 @@ class QuizzesService {
       await QuizzesRepository.updateQuizAttemptRecord(quizAttempt.id, {
         quizType: answerObject.quizGenre,
       });
+      quizAttempt.quizType = answerObject.quizGenre;
     } else {
       const lastQuizResponse = await QuizzesRepository.getLastQuizResponse(
         quizAttempt.id
