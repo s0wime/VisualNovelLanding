@@ -25,15 +25,6 @@ class VisitorsRepository {
       data: params,
     });
   }
-
-  static async addVisitorEmail(visitorId, email) {
-    return await prisma.visitor.update({
-      where: {
-        id: visitorId,
-      },
-      data: { email },
-    });
-  }
 }
 
 export default VisitorsRepository;
