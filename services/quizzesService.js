@@ -235,7 +235,7 @@ class QuizzesService {
       await EventsService.handleEvent(quizAttempt.visitorId, "QUIZ_ENDED");
       return {
         quizEnded: true,
-        storyText: await this.getStoryByAnswers(quizAttempt),
+        text: await this.getStoryByAnswers(quizAttempt),
       };
     }
 
