@@ -233,7 +233,10 @@ class QuizzesService {
       };
       await QuizzesRepository.updateQuizAttemptRecord(quizAttempt.id, params);
       await EventsService.handleEvent(quizAttempt.visitorId, "QUIZ_ENDED");
-      return this.getStoryByAnswers(quizAttempt);
+      return {
+        quizEnded: true,
+        storyText: await this.getStoryByAnswers(quizAttempt),
+      };
     }
 
     return nextQuestionObject;
