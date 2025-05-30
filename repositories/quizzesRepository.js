@@ -97,6 +97,32 @@ class QuizzesRepository {
       data: params,
     });
   }
+
+  static async getQuizAttemptResponses(quizAttemptId) {
+    return await prisma.quizResponse.findMany({
+      where: {
+        quizAttemptId: quizAttemptId,
+      },
+      include: {
+        answer: true,
+      },
+    });
+  }
+
+  static async getStoryRecord(option, genre) {
+    return await prisma.story.findFirst({
+      where: {
+        AND: [
+          {
+            option: option,
+          },
+          {
+            genre: genre,
+          },
+        ],
+      },
+    });
+  }
 }
 
 export default QuizzesRepository;

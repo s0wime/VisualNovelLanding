@@ -140,6 +140,34 @@ class QuizzesService {
     return await this.continueQuiz(quizAttempt);
   }
 
+  static async getStoryByAnswers(quizAttempt) {
+    const quizResponses = await QuizzesRepository.getQuizAttemptResponses(
+      quizAttempt.id
+    );
+    const options = quizResponses.map((response) => {
+      response.answer.option;
+    });
+    const frequency = {};
+    for (let option in options) {
+      frequency[option] = (frequency[option] || 0) + 1;
+    }
+
+    let maxOption = "";
+    let maxCount = 0;
+
+    for (let option in frequency) {
+      if (frequency[option] > maxCount) {
+        maxCount = frequency[option];
+        maxOption = option;
+      }
+    }
+
+    return await QuizzesRepository.getStoryRecord(
+      maxOption,
+      quizAttempt.quizGenre
+    ).text;
+  }
+
   static async continueQuiz(quizAttempt) {
     const session = await SessionsService.getActiveSession(
       quizAttempt.visitorId
@@ -205,10 +233,7 @@ class QuizzesService {
       };
       await QuizzesRepository.updateQuizAttemptRecord(quizAttempt.id, params);
       await EventsService.handleEvent(quizAttempt.visitorId, "QUIZ_ENDED");
-      return {
-        quizEnded: true,
-        message: "You have successfully completed the quiz.",
-      };
+      return this.getStoryByAnswers(quizAttempt);
     }
 
     return nextQuestionObject;
