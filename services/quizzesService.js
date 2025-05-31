@@ -106,11 +106,7 @@ class QuizzesService {
       }
 
       if (lastQuizResponse) {
-        if (answeredQuestionObject.order <= lastQuizResponse.question.order) {
-          throw new QuizHandlingError(
-            "You already have answered to this question."
-          );
-        } else if (
+        if (
           answeredQuestionObject.order >
           lastQuizResponse.question.order + 1
         ) {
@@ -144,11 +140,12 @@ class QuizzesService {
     const quizResponses = await QuizzesRepository.getQuizAttemptResponses(
       quizAttempt.id
     );
+
     const options = quizResponses.map((response) => {
-      response.answer.option;
+      return response.answer.option;
     });
     const frequency = {};
-    for (let option in options) {
+    for (let option of options) {
       frequency[option] = (frequency[option] || 0) + 1;
     }
 
@@ -162,10 +159,12 @@ class QuizzesService {
       }
     }
 
-    return await QuizzesRepository.getStoryRecord(
+    const storyRecord = await QuizzesRepository.getStoryRecord(
       maxOption,
-      quizAttempt.quizGenre
-    ).text;
+      quizAttempt.quizType
+    );
+
+    return storyRecord.text;
   }
 
   static async continueQuiz(quizAttempt) {
@@ -242,6 +241,30 @@ class QuizzesService {
     }
 
     return nextQuestionObject;
+  }
+
+  static async getPreviousQuizQuestion(visitorId) {
+    const session = await SessionsRepository.getActiveSession(visitorId);
+    if (!session) {
+      throw new Error("There is no active session in visitor.");
+    }
+
+    const quizAttempt = await QuizzesRepository.getQuizAttemptRecord(
+      session.id
+    );
+    if (!quizAttempt) {
+      return new QuizHandlingError("There is no active quiz in visitor.");
+    }
+
+    const lastQuizResponse = await QuizzesRepository.getLastQuizResponse(
+      quizAttempt.id
+    );
+    if (!lastQuizResponse) {
+      return await this.continueQuiz(quizAttempt.id);
+    }
+
+    await QuizzesRepository.removeQuizResponseRecord(lastQuizResponse.id);
+    return await this.continueQuiz(quizAttempt.id);
   }
 }
 

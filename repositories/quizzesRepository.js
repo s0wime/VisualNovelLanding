@@ -89,6 +89,14 @@ class QuizzesRepository {
     });
   }
 
+  static async removeQuizResponseRecord(quizResponseId) {
+    return await prisma.quizResponse.delete({
+      where: {
+        id: quizResponseId,
+      },
+    });
+  }
+
   static async updateQuizAttemptRecord(quizAttemptId, params) {
     return await prisma.quizAttempt.update({
       where: {
