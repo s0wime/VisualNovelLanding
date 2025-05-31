@@ -12,6 +12,7 @@ model Visitor {
   id String @db.Uuid @id
   firstSeenAt DateTime @default(now())
   lastSeenAt DateTime @default(now())
+  email String?
   sessions Session[]
   events Event[]
   quizAttempts QuizAttempt[]
@@ -107,4 +108,5 @@ enum EventType {
   CLICK_TRY_PAID
   QUIZ_STARTED
   QUIZ_ENDED
+  EMAIL_SUBMITTED
 }
