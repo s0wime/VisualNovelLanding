@@ -244,7 +244,7 @@ class QuizzesService {
   }
 
   static async getPreviousQuizQuestion(visitorId) {
-    const session = await SessionsRepository.getActiveSession(visitorId);
+    const session = await SessionsRepository.readActiveSessionRecord(visitorId);
     if (!session) {
       throw new Error("There is no active session in visitor.");
     }
@@ -259,12 +259,12 @@ class QuizzesService {
     const lastQuizResponse = await QuizzesRepository.getLastQuizResponse(
       quizAttempt.id
     );
-    if (!lastQuizResponse) {
-      return await this.continueQuiz(quizAttempt.id);
+    if (lastQuizResponse) {
+      console.log(lastQuizResponse);
+      await QuizzesRepository.removeQuizResponseRecord(lastQuizResponse.id);
     }
 
-    await QuizzesRepository.removeQuizResponseRecord(lastQuizResponse.id);
-    return await this.continueQuiz(quizAttempt.id);
+    return await this.continueQuiz(quizAttempt);
   }
 }
 

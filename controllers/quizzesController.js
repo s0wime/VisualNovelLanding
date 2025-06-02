@@ -4,7 +4,7 @@ class QuizzesController {
   static async answerQuiz(req, res, next) {
     const { visitorId, answerObject } = req.body;
 
-    if (!visitorId) {
+    if (!visitorId || !answerObject) {
       return res.status(400).json({ error: "Bad request." });
     }
 
