@@ -5,6 +5,7 @@ import eventsRouter from "./routes/eventsRouter.js";
 import quizzesRouter from "./routes/quizzesRouter.js";
 import dotenv from "dotenv";
 import cors from "cors";
+import scheduleSessionsCleanup from "./sessionCleanup.js";
 
 const PORT = 3000;
 
@@ -51,3 +52,5 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`App is running on http://localhost:${PORT}`);
 });
+
+scheduleSessionsCleanup();

@@ -88,6 +88,43 @@ class SessionsService {
     };
     return await SessionsRepository.updateSessionRecord(sessionId, params);
   }
+
+  static async cleanupPossibleInactiveSessions() {
+    const SESSION_TIMEOUT_MILLISECONDS = 3 * 60 * 1000;
+    const timeoutThreshold = new Date(
+      Date.now() - SESSION_TIMEOUT_MILLISECONDS
+    ).toISOString();
+
+    const inactiveSessions =
+      await SessionsRepository.findPossibleInactiveSessionRecords(
+        timeoutThreshold
+      );
+
+    if (!inactiveSessions) {
+      return;
+    }
+
+    for (const session of inactiveSessions) {
+      try {
+        const sessionEndTime = session.lastActivityAt;
+        const duration =
+          Math.abs(
+            new Date(session.sessionStart).getTime() -
+              new Date(sessionEndTime).getTime()
+          ) / 1000;
+
+        const params = {
+          duration: duration,
+          sessionEnd: sessionEndTime,
+        };
+        await SessionsRepository.updateSessionRecord(session.id, params);
+      } catch (e) {
+        console.log(
+          `Error closing session ID:${session.id} UUID:${session.visitorId}`
+        );
+      }
+    }
+  }
 }
 
 export default SessionsService;

@@ -21,6 +21,23 @@ class SessionsRepository {
       data: params,
     });
   }
+
+  static async findPossibleInactiveSessionRecords(threshold) {
+    return await prisma.session.findMany({
+      where: {
+        AND: [
+          {
+            sessionEnd: null,
+          },
+          {
+            lastActivityAt: {
+              lt: threshold,
+            },
+          },
+        ],
+      },
+    });
+  }
 }
 
 export default SessionsRepository;
