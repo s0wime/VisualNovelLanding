@@ -77,7 +77,11 @@ class QuizzesService {
         age: answerObject.age,
       });
     } else if (answerObject.aboutGender) {
-      if (!["Male", "Female", "Other"].includes(answerObject.gender)) {
+      if (
+        !["Male", "Female", "Non-binary", "Prefer not to say"].includes(
+          answerObject.gender
+        )
+      ) {
         throw new BadRequestError("Bad request!");
       }
 
