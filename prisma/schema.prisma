@@ -93,6 +93,7 @@ model QuizResponse {
 model Story {
   id Int @id @default(autoincrement())
   option String
+  title String
   text String
   genre GenreType
 }

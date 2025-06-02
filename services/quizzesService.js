@@ -168,7 +168,7 @@ class QuizzesService {
       quizAttempt.quizType
     );
 
-    return storyRecord.text;
+    return storyRecord;
   }
 
   static async continueQuiz(quizAttempt) {
@@ -237,10 +237,12 @@ class QuizzesService {
       await QuizzesRepository.updateQuizAttemptRecord(quizAttempt.id, params);
       await EventsService.handleEvent(quizAttempt.visitorId, "QUIZ_ENDED");
 
-      const storyText = await this.getStoryByAnswers(quizAttempt);
+      const storyObj = await this.getStoryByAnswers(quizAttempt);
       return {
         quizEnded: true,
-        text: storyText,
+        title: storyObj.title,
+        text: storyObj.text,
+        genre: storyObj.genre,
       };
     }
 
