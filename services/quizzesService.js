@@ -69,7 +69,7 @@ class QuizzesService {
     ]);
 
     if (answerObject.aboutAge) {
-      if (answerObject.age < 1 || answerObject.age > 100) {
+      if (!["17-21", "21-35", "35-45", "45+"].includes(answerObject.age)) {
         throw new BadRequestError("Bad request!");
       }
 
