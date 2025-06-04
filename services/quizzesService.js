@@ -89,6 +89,7 @@ class QuizzesService {
         gender: answerObject.gender,
       });
     } else if (answerObject.aboutQuizGenre) {
+      console.log(Object.values(GenreType));
       if (!Object.values(GenreType).includes(answerObject.quizGenre)) {
         throw new BadRequestError("Bad request!");
       }
